@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarVault — Manage Your Fleet</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- AUTH PAGE -->
+  <div id="auth-page" class="page active">
+    <div class="auth-container">
+      <div class="auth-brand">
+        <div class="brand-icon">🚗</div>
+        <h1>CarVault</h1>
+        <p>Your personal car management dashboard</p>
+      </div>
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+          <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-form" class="auth-form">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="login-email" placeholder="you@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="••••••••" />
+          </div>
+          <div id="login-error" class="form-error hidden"></div>
+          <button class="btn btn-primary btn-full" onclick="login()">Login</button>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signup-form" class="auth-form hidden">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="signup-username" placeholder="cooldriver" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="signup-email" placeholder="you@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signup-password" placeholder="Min 6 characters" />
+          </div>
+          <div id="signup-error" class="form-error hidden"></div>
+          <button class="btn btn-primary btn-full" onclick="signup()">Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app-page" class="page hidden">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="nav-brand">
+        <span class="brand-icon-sm">🚗</span>
+        <span>CarVault</span>
+      </div>
+      <div class="nav-right">
+        <span id="nav-username" class="nav-user"></span>
+        <button class="btn btn-ghost" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+
+    <!-- CARS LIST VIEW -->
+    <div id="list-view" class="view active">
+      <div class="container">
+        <div class="list-header">
+          <div>
+            <h2>My Cars</h2>
+            <p id="car-count" class="sub-text"></p>
+          </div>
+          <button class="btn btn-primary" onclick="showCreateView()">+ Add Car</button>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="search-input" placeholder="Search by title, description, tags…" oninput="searchCars()" />
+        </div>
+        <div id="cars-grid" class="cars-grid"></div>
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-icon">🚘</div>
+          <h3>No cars yet</h3>
+          <p>Add your first car to get started</p>
+          <button class="btn btn-primary" onclick="showCreateView()">Add Car</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATE VIEW -->
+    <div id="create-view" class="view hidden">
+      <div class="container">
+        <div class="view-header">
+          <button class="btn btn-ghost" onclick="showListView()">← Back</button>
+          <h2>Add New Car</h2>
+        </div>
+        <div class="form-card">
+          <div class="form-group">
+            <label>Title <span class="req">*</span></label>
+            <input type="text" id="create-title" placeholder="e.g. My Tesla Model 3" />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="create-desc" rows="4" placeholder="Describe your car…"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Car Type</label>
+              <input type="text" id="create-cartype" placeholder="e.g. Sedan, SUV, Sports" />
+            </div>
+            <div class="form-group">
+              <label>Company</label>
+              <input type="text" id="create-company" placeholder="e.g. Tesla, BMW" />
+            </div>
+            <div class="form-group">
+              <label>Dealer</label>
+              <input type="text" id="create-dealer" placeholder="e.g. AutoMax Delhi" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Images <span class="hint">(Max 10)</span></label>
+            <div class="upload-area" onclick="document.getElementById('create-images').click()">
+              <div class="upload-icon">📷</div>
+              <p>Click to upload images</p>
+              <span>JPG, PNG, GIF, WebP up to 5MB each</span>
+            </div>
+            <input type="file" id="create-images" multiple accept="image/*" style="display:none" onchange="previewImages(this, 'create-preview')" />
+            <div id="create-preview" class="img-preview"></div>
+          </div>
+          <div id="create-error" class="form-error hidden"></div>
+          <div class="form-actions">
+            <button class="btn btn-ghost" onclick="showListView()">Cancel</button>
+            <button class="btn btn-primary" onclick="createCar()">Save Car</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL VIEW -->
+    <div id="detail-view" class="view hidden">
+      <div class="container">
+        <div class="view-header">
+          <button class="btn btn-ghost" onclick="showListView()">← Back</button>
+          <div class="detail-actions">
+            <button class="btn btn-secondary" onclick="showEditView()">Edit</button>
+            <button class="btn btn-danger" onclick="deleteCar()">Delete</button>
+          </div>
+        </div>
+        <div id="car-detail-content"></div>
+      </div>
+    </div>
+
+    <!-- EDIT VIEW -->
+    <div id="edit-view" class="view hidden">
+      <div class="container">
+        <div class="view-header">
+          <button class="btn btn-ghost" onclick="showDetailView()">← Back</button>
+          <h2>Edit Car</h2>
+        </div>
+        <div class="form-card">
+          <div class="form-group">
+            <label>Title <span class="req">*</span></label>
+            <input type="text" id="edit-title" placeholder="e.g. My Tesla Model 3" />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="edit-desc" rows="4" placeholder="Describe your car…"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Car Type</label>
+              <input type="text" id="edit-cartype" placeholder="e.g. Sedan" />
+            </div>
+            <div class="form-group">
+              <label>Company</label>
+              <input type="text" id="edit-company" placeholder="e.g. Tesla" />
+            </div>
+            <div class="form-group">
+              <label>Dealer</label>
+              <input type="text" id="edit-dealer" placeholder="e.g. AutoMax" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Current Images</label>
+            <div id="edit-current-images" class="img-preview"></div>
+          </div>
+          <div class="form-group">
+            <label>Add More Images</label>
+            <div class="upload-area" onclick="document.getElementById('edit-images').click()">
+              <div class="upload-icon">📷</div>
+              <p>Click to upload more images</p>
+            </div>
+            <input type="file" id="edit-images" multiple accept="image/*" style="display:none" onchange="previewImages(this, 'edit-new-preview')" />
+            <div id="edit-new-preview" class="img-preview"></div>
+          </div>
+          <div id="edit-error" class="form-error hidden"></div>
+          <div class="form-actions">
+            <button class="btn btn-ghost" onclick="showDetailView()">Cancel</button>
+            <button class="btn btn-primary" onclick="updateCar()">Update Car</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
